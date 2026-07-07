@@ -21,7 +21,7 @@ try {
   Expand-Archive -LiteralPath $zipPath -DestinationPath $unzipDir -Force
 
   $documentPath = Join-Path $unzipDir "word/document.xml"
-  $doc = [xml](Get-Content -LiteralPath $documentPath -Raw)
+  $doc = [xml](Get-Content -LiteralPath $documentPath -Raw -Encoding UTF8)
   $ns = New-Object System.Xml.XmlNamespaceManager($doc.NameTable)
   $ns.AddNamespace("w", "http://schemas.openxmlformats.org/wordprocessingml/2006/main")
 
@@ -72,13 +72,41 @@ try {
     }
   }
 
-  $doc.Save($documentPath)
+  $citationLinks = $doc.SelectNodes("//w:hyperlink[starts-with(@w:anchor, 'ref-')]", $ns)
+  foreach ($link in $citationLinks) {
+    $runs = $link.SelectNodes(".//w:r", $ns)
+    foreach ($run in $runs) {
+      $rPr = $run.SelectSingleNode("./w:rPr", $ns)
+      if ($null -eq $rPr) {
+        $rPr = $doc.CreateElement("w", "rPr", $ns.LookupNamespace("w"))
+        [void]$run.PrependChild($rPr)
+      }
+
+      $vertAlign = $rPr.SelectSingleNode("./w:vertAlign", $ns)
+      if ($null -eq $vertAlign) {
+        $vertAlign = $doc.CreateElement("w", "vertAlign", $ns.LookupNamespace("w"))
+        [void]$rPr.AppendChild($vertAlign)
+      }
+      [void]$vertAlign.SetAttribute("val", $ns.LookupNamespace("w"), "superscript")
+    }
+  }
+
+  $settings = New-Object System.Xml.XmlWriterSettings
+  $settings.Encoding = New-Object System.Text.UTF8Encoding($false)
+  $settings.Indent = $true
+  $writer = [System.Xml.XmlWriter]::Create($documentPath, $settings)
+  try {
+    $doc.Save($writer)
+  }
+  finally {
+    $writer.Close()
+  }
 
   $formattedZip = Join-Path $workDir "formatted.zip"
   Compress-Archive -Path (Join-Path $unzipDir "*") -DestinationPath $formattedZip -Force
   Copy-Item -LiteralPath $formattedZip -Destination $resolvedDocx -Force
 
-  Write-Host "Formatted $($tables.Count) tables in $resolvedDocx"
+  Write-Host "Formatted $($tables.Count) tables and $($citationLinks.Count) citation links in $resolvedDocx"
 }
 finally {
   if (Test-Path -LiteralPath $workDir) {

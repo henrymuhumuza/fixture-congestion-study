@@ -47,11 +47,15 @@ covid_win_tbl <- read_csv("../outputs/tables/table_5_covid_sensitivity_win_odds.
 fmt <- function(x, digits = 2) format(round(as.numeric(x), digits), nsmall = digits)
 pct <- function(x) scales::percent(as.numeric(x), accuracy = 0.1)
 rest_label <- function(x) {
-  labels <- if (knitr::is_html_output()) c("<=" = "&le;", ">=" = "&ge;") else c("<=" = "<=", ">=" = ">=")
+  labels <- if (knitr::is_html_output()) {
+    c("<=" = "&le;", ">=" = "&ge;")
+  } else {
+    c("<=" = "≤", ">=" = "≥")
+  }
   stringr::str_replace_all(x, labels)
 }
-le <- function() if (knitr::is_html_output()) "&le;" else "<="
-ge <- function() if (knitr::is_html_output()) "&ge;" else ">="
+le <- function() if (knitr::is_html_output()) "&le;" else "≤"
+ge <- function() if (knitr::is_html_output()) "&ge;" else "≥"
 
 short_effect <- effects_tbl |> filter(outcome == "Shot difference", contrast == "<=3 days") |> slice(1)
 goal_short <- effects_tbl |> filter(outcome == "Goal difference", contrast == "<=3 days") |> slice(1)
@@ -186,17 +190,17 @@ Notation: $i$ indexes the team, $j$ indexes the opponent, and $m$ indexes the le
 :::
 
 ::: {.content-visible when-format="docx"}
-```text
-ShotDiff_ijm =
-  beta0 + beta1 Rest_ijm + beta2 Venue_ijm
-  + beta3 TeamForm_ijm + beta4 OppForm_ijm + beta5 MarketGap_ijm
-  + beta6 League_ijm + beta7 Season_ijm + beta8 SeasonProgress_ijm
-  + beta9 AllLoad7_ijm + beta10 EuropeLoad7_ijm + beta11 CupLoad7_ijm
-  + beta12 AwayLoad7_ijm + beta13 PrevEurope_ijm
-  + u_i + v_j + error_ijm
-```
+$$
+\begin{aligned}
+ShotDiff_{ijm} =\ &\beta_0 + \beta_1 Rest_{ijm} + \beta_2 Venue_{ijm} \\
+&+ \beta_3 TeamForm_{ijm} + \beta_4 OppForm_{ijm} + \beta_5 MarketGap_{ijm} \\
+&+ \beta_6 League_{ijm} + \beta_7 Season_{ijm} + \beta_8 SeasonProgress_{ijm} \\
+&+ \beta_9 AllLoad7_{ijm} + \beta_{10} EuropeLoad7_{ijm} + \beta_{11} CupLoad7_{ijm} \\
+&+ \beta_{12} AwayLoad7_{ijm} + \beta_{13} PrevEurope_{ijm} + u_i + v_j + \varepsilon_{ijm}
+\end{aligned}
+$$
 
-Notation: i indexes the team, j indexes the opponent, and m indexes the league match. u_i is the team random intercept, v_j is the opponent random intercept, and error_ijm is the residual error term for that team-match observation.
+Notation: $i$ indexes the team, $j$ indexes the opponent, and $m$ indexes the league match. $u_i$ is the team random intercept, $v_j$ is the opponent random intercept, and $\varepsilon_{ijm}$ is the residual error term for that team-match observation.
 :::
 
 In this model, shot difference means team shots minus opponent shots. Rest category compares shorter rest intervals with the reference category of `r ge()`8 days. Venue indicates whether the team was playing at home or away. Prior team form and prior opponent form are each the average points earned over the previous ten league matches. Market-implied strength difference is the bookmaker-implied win probability for the team minus the bookmaker-implied win probability for the opponent, after normalizing for bookmaker margin. Season progress measures how far through the team league season the match occurred. Recent all-match load, European match load, domestic cup match load, and away-match load count matches in the preceding seven days. The previous-European-match indicator identifies whether the immediately preceding included fixture was a European match.
