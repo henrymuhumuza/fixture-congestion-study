@@ -10,6 +10,7 @@ format:
     theme: cosmo
     css: styles.css
   docx:
+    from: markdown-smart
     toc: false
     number-sections: false
     reference-doc: reference.docx
@@ -45,7 +46,12 @@ covid_win_tbl <- read_csv("../outputs/tables/table_5_covid_sensitivity_win_odds.
 
 fmt <- function(x, digits = 2) format(round(as.numeric(x), digits), nsmall = digits)
 pct <- function(x) scales::percent(as.numeric(x), accuracy = 0.1)
-rest_label <- function(x) stringr::str_replace_all(x, c("<=" = "&le;", ">=" = "&ge;"))
+rest_label <- function(x) {
+  labels <- if (knitr::is_html_output()) c("<=" = "&le;", ">=" = "&ge;") else c("<=" = "<=", ">=" = ">=")
+  stringr::str_replace_all(x, labels)
+}
+le <- function() if (knitr::is_html_output()) "&le;" else "<="
+ge <- function() if (knitr::is_html_output()) "&ge;" else ">="
 
 short_effect <- effects_tbl |> filter(outcome == "Shot difference", contrast == "<=3 days") |> slice(1)
 goal_short <- effects_tbl |> filter(outcome == "Goal difference", contrast == "<=3 days") |> slice(1)
@@ -82,9 +88,9 @@ Corresponding author: Henry Muhumuza, Makerere University, Kampala, Uganda; Emai
 
 **Objective.** To estimate whether short rest before domestic league matches is associated with short-term team performance decline in elite European football.
 
-**Methods.** We analysed Big Five league matches from 2017/18 through 2021/22. League outcomes came from Football-Data.co.uk. Workload exposure was calculated from a combined team-match schedule that added archived worldfootballR cup-result files for the UEFA Champions League, UEFA Europa League, UEFA Europa Conference League, FA Cup, English Football League Cup, DFB-Pokal, Coppa Italia, Copa del Rey, and Coupe de France. The analytic unit was the league team-match. Rest days were calculated as the interval between a team's current league match and its previous included match in any competition within the same season. The primary outcome was shot difference; secondary outcomes were shots-on-target difference, goal difference, foul difference, card difference, and odds of winning. A prespecified COVID sensitivity analysis excluded 2019/20 matches from March 1, 2020 onward.
+**Methods.** We analysed Big Five league matches from 2017/18 through 2021/22. League outcomes came from Football-Data.co.uk. Workload exposure was calculated from a combined team-match schedule that added archived worldfootballR cup-result files for the UEFA Champions League, UEFA Europa League, UEFA Europa Conference League, FA Cup, English Football League Cup, DFB-Pokal, Coppa Italia, Copa del Rey, and Coupe de France. The analytic unit was the league team-match. Rest days were calculated as the interval between the current league match for a team and its previous included match in any competition within the same season. The primary outcome was shot difference; secondary outcomes were shots-on-target difference, goal difference, foul difference, card difference, and odds of winning. A prespecified COVID sensitivity analysis excluded 2019/20 matches from March 1, 2020 onward.
 
-**Results.** The analysis included `r scales::comma(summary_tbl$team_matches)` league team-match observations from `r scales::comma(summary_tbl$matches)` matches, `r summary_tbl$teams` teams, five leagues, and `r summary_tbl$seasons` seasons. Short rest (&le;3 days) occurred in `r scales::comma(summary_tbl$short_rest_team_matches)` observations (`r pct(summary_tbl$short_rest_share)`). In the adjusted primary model, &le;3 days of rest was associated with `r fmt(short_effect$estimate)` shots relative to &ge;8 days (95% CI `r fmt(short_effect$conf_low)` to `r fmt(short_effect$conf_high)`). The corresponding estimates were `r fmt(foul_short$estimate)` fouls (95% CI `r fmt(foul_short$conf_low)` to `r fmt(foul_short$conf_high)`) and `r fmt(card_short$estimate)` cards (95% CI `r fmt(card_short$conf_low)` to `r fmt(card_short$conf_high)`). The adjusted odds ratio for winning was `r fmt(win_short$odds_ratio)` (95% CI `r fmt(win_short$conf_low)` to `r fmt(win_short$conf_high)`). Excluding the COVID-affected end of 2019/20 gave a similar shot-difference estimate: `r fmt(covid_short$estimate)` shots (95% CI `r fmt(covid_short$conf_low)` to `r fmt(covid_short$conf_high)`).
+**Results.** The analysis included `r scales::comma(summary_tbl$team_matches)` league team-match observations from `r scales::comma(summary_tbl$matches)` matches, `r summary_tbl$teams` teams, five leagues, and `r summary_tbl$seasons` seasons. Short rest (`r le()`3 days) occurred in `r scales::comma(summary_tbl$short_rest_team_matches)` observations (`r pct(summary_tbl$short_rest_share)`). In the adjusted primary model, `r le()`3 days of rest was associated with `r fmt(short_effect$estimate)` shots relative to `r ge()`8 days (95% CI `r fmt(short_effect$conf_low)` to `r fmt(short_effect$conf_high)`). The corresponding estimates were `r fmt(foul_short$estimate)` fouls (95% CI `r fmt(foul_short$conf_low)` to `r fmt(foul_short$conf_high)`) and `r fmt(card_short$estimate)` cards (95% CI `r fmt(card_short$conf_low)` to `r fmt(card_short$conf_high)`). The adjusted odds ratio for winning was `r fmt(win_short$odds_ratio)` (95% CI `r fmt(win_short$conf_low)` to `r fmt(win_short$conf_high)`). Excluding the COVID-affected end of 2019/20 gave a similar shot-difference estimate: `r fmt(covid_short$estimate)` shots (95% CI `r fmt(covid_short$conf_low)` to `r fmt(covid_short$conf_high)`).
 
 **Conclusion.** Short rest was not clearly associated with a large decline in aggregate league-match performance. The estimates were slightly negative for shot difference and odds of winning, but confidence intervals included no meaningful effect.
 
@@ -102,7 +108,7 @@ The preferred conceptual outcome is xG difference because it captures chance qua
 
 ## Study Design and Period
 
-We conducted a repeated-measures observational study of elite men's football from July 1, 2017 through June 30, 2022, corresponding to seasons 2017/18 through 2021/22. The design was a team-match panel: each league match contributed one row for the home team and one row for the away team. This is preferable to a one-row-per-match design because rest exposure is team-specific.
+We conducted a repeated-measures observational study of elite male football from July 1, 2017 through June 30, 2022, corresponding to seasons 2017/18 through 2021/22. The design was a team-match panel: each league match contributed one row for the home team and one row for the away team. This is preferable to a one-row-per-match design because rest exposure is team-specific.
 
 ## Data Sources
 
@@ -120,8 +126,8 @@ The final analytic dataset was produced as follows.
 4. Football-Data home variables were mapped as home-team outcomes: `FTHG` (full-time home goals), `HS` (home shots), and `HST` (home shots on target). Away variables were mapped as away-team outcomes: `FTAG` (full-time away goals), `AS` (away shots), and `AST` (away shots on target).
 5. Team outcomes were calculated as team minus opponent values: goal difference, shot difference, shots-on-target difference, corner difference, foul difference, and card difference.
 6. The binary win outcome was coded as 1 when team goal difference was positive and 0 otherwise. These win odds are estimated from observed match results, not copied from bookmaker odds.
-7. Closing average 1X2 odds were used when available. In football betting, 1X2 odds are prices for the three possible match results: home win ("1"), draw ("X"), and away win ("2"). Lower odds imply that the bookmaker and betting market view that result as more likely. Where average odds were unavailable, the script fell back to Bet365 or Pinnacle odds. Odds were converted to implied win probabilities and normalized for bookmaker margin, so the three result probabilities summed to one after removing the bookmaker's built-in overround. Team minus opponent implied win probability was used as a market-strength covariate. This covariate is useful because congested fixtures are not randomly assigned: stronger teams are more likely to play in Europe and domestic cups, and betting markets summarize team quality, injuries, venue, and opponent strength immediately before a match. It is not biologically necessary for defining fixture congestion, but it is analytically important for reducing confounding by expected team strength.
-8. Cup and European files were restricted to men's matches in the same date window to keep the workload schedule aligned with the men's Big Five league outcome sample and to avoid combining competitions with different team pools, calendars, and data-generating processes.
+7. Closing average 1X2 odds were used when available. In football betting, 1X2 odds are prices for the three possible match results: home win, draw, and away win. Lower odds imply that the bookmaker and betting market view that result as more likely. Where average odds were unavailable, the script fell back to Bet365 or Pinnacle odds. Odds were converted to implied win probabilities and normalized for bookmaker margin, so the three result probabilities summed to one after removing the bookmaker built-in overround. Team minus opponent implied win probability was used as a market-strength covariate. This covariate is useful because congested fixtures are not randomly assigned: stronger teams are more likely to play in Europe and domestic cups, and betting markets summarize team quality, injuries, venue, and opponent strength immediately before a match. It is not biologically necessary for defining fixture congestion, but it is analytically important for reducing confounding by expected team strength.
+8. Cup and European files were restricted to male matches in the same date window to keep the workload schedule aligned with the male Big Five league outcome sample and to avoid combining competitions with different team pools, calendars, and data-generating processes.
 9. FBref/worldfootballR team names were harmonized to Football-Data names using deterministic aliases, for example `Manchester City` to `Man City`, `Manchester Utd` to `Man United`, `Paris S-G` to `Paris SG`, and `Athletic Club` to `Ath Bilbao`.
 10. League, European, and domestic cup schedule rows were combined into one team-season schedule.
 11. Rest days and workload variables were computed from all earlier included matches in the same team-season.
@@ -136,7 +142,7 @@ The main exposure was rest before a league match:
 current league match date - previous included match date in same team-season
 ```
 
-Rest was categorized as &le;3 days, 4-5 days, 6-7 days, and &ge;8 days. The &ge;8 day category was the reference group.
+Rest was categorized as `r le()`3 days, 4-5 days, 6-7 days, and `r ge()`8 days. The `r ge()`8 day category was the reference group.
 
 Additional workload measures were the number of matches in the previous 7, 14, and 28 days; European matches in the previous 7 and 14 days; domestic cup matches in the previous 7 days; away matches in the previous 7 days; and whether the immediately previous match was European.
 
@@ -158,11 +164,13 @@ Rolling team and opponent form were calculated as mean points over the previous 
 
 ## Statistical Analysis
 
-The primary model was a linear mixed-effects model in which shot difference was regressed on rest category, venue, prior team form, prior opponent form, market-implied strength difference, league, season, season progress, recent all-match load, recent European match load, recent domestic cup match load, recent away-match load, and whether the team's immediately previous match was in European competition. The model also included random intercepts for the team and the opponent.
+The primary model was a linear mixed-effects model in which shot difference was regressed on rest category, venue, prior team form, prior opponent form, market-implied strength difference, league, season, season progress, recent all-match load, recent European match load, recent domestic cup match load, recent away-match load, and whether the immediately previous match for a team was in European competition. The model also included random intercepts for the team and the opponent.
 
 Model formula in words: shot difference equals beta0 plus rest category plus venue plus prior team form plus prior opponent form plus market-implied strength difference plus league plus season plus season progress plus recent all-match load plus recent European match load plus recent domestic cup match load plus recent away-match load plus previous European match indicator plus team random intercept plus opponent random intercept plus error.
 
 In equation form, the primary model was:
+
+::: {.content-visible when-format="html"}
 
 $$
 \begin{aligned}
@@ -175,8 +183,23 @@ ShotDiff_{ijm} =\ &\beta_0 + \beta_1 Rest_{ijm} + \beta_2 Venue_{ijm} \\
 $$
 
 Notation: $i$ indexes the team, $j$ indexes the opponent, and $m$ indexes the league match. $u_i$ is the team random intercept, $v_j$ is the opponent random intercept, and $\varepsilon_{ijm}$ is the residual error term for that team-match observation.
+:::
 
-In this model, shot difference means team shots minus opponent shots. Rest category compares shorter rest intervals with the reference category of &ge;8 days. Venue indicates whether the team was playing at home or away. Prior team form and prior opponent form are each the average points earned over the previous ten league matches. Market-implied strength difference is the team's bookmaker-implied win probability minus the opponent's bookmaker-implied win probability, after normalizing for bookmaker margin. Season progress measures how far through the team's league season the match occurred. Recent all-match load, European match load, domestic cup match load, and away-match load count matches in the preceding seven days. The previous-European-match indicator identifies whether the immediately preceding included fixture was a European match.
+::: {.content-visible when-format="docx"}
+```text
+ShotDiff_ijm =
+  beta0 + beta1 Rest_ijm + beta2 Venue_ijm
+  + beta3 TeamForm_ijm + beta4 OppForm_ijm + beta5 MarketGap_ijm
+  + beta6 League_ijm + beta7 Season_ijm + beta8 SeasonProgress_ijm
+  + beta9 AllLoad7_ijm + beta10 EuropeLoad7_ijm + beta11 CupLoad7_ijm
+  + beta12 AwayLoad7_ijm + beta13 PrevEurope_ijm
+  + u_i + v_j + error_ijm
+```
+
+Notation: i indexes the team, j indexes the opponent, and m indexes the league match. u_i is the team random intercept, v_j is the opponent random intercept, and error_ijm is the residual error term for that team-match observation.
+:::
+
+In this model, shot difference means team shots minus opponent shots. Rest category compares shorter rest intervals with the reference category of `r ge()`8 days. Venue indicates whether the team was playing at home or away. Prior team form and prior opponent form are each the average points earned over the previous ten league matches. Market-implied strength difference is the bookmaker-implied win probability for the team minus the bookmaker-implied win probability for the opponent, after normalizing for bookmaker margin. Season progress measures how far through the team league season the match occurred. Recent all-match load, European match load, domestic cup match load, and away-match load count matches in the preceding seven days. The previous-European-match indicator identifies whether the immediately preceding included fixture was a European match.
 
 Team and opponent random intercepts accounted for repeated observations and persistent quality differences. Continuous covariates for form, market strength, and season progress were standardized before modelling. Secondary linear mixed-effects models used the same covariates and replaced shot difference with shots-on-target difference, goal difference, foul difference, and card difference. A logistic mixed-effects model with the same covariates estimated adjusted odds ratios for winning.
 
@@ -278,7 +301,7 @@ desc_tbl |>
   kable(caption = "Descriptive outcomes by rest category", align = c("l", "r", "r", "r", "r", "r", "r", "r", "r"), escape = FALSE)
 ```
 
-Unadjusted performance was not worse in the shortest-rest group. Teams playing on &le;3 days of rest had higher mean shot difference, shots-on-target difference, goal difference, and points than teams with longer rest. Foul and card differences were also summarized as secondary disciplinary outcomes. This pattern is consistent with stronger clubs being more likely to experience congested schedules, which is why adjustment for team strength, opponent strength, market expectation, and competition involvement is essential.
+Unadjusted performance was not worse in the shortest-rest group. Teams playing on `r le()`3 days of rest had higher mean shot difference, shots-on-target difference, goal difference, and points than teams with longer rest. Foul and card differences were also summarized as secondary disciplinary outcomes. This pattern is consistent with stronger clubs being more likely to experience congested schedules, which is why adjustment for team strength, opponent strength, market expectation, and competition involvement is essential.
 
 [Figure 1a](#figure-1a) shows the number of team-match observations in each rest category.
 
@@ -361,7 +384,7 @@ win_odds_tbl |>
   kable(caption = "Adjusted odds ratios for winning", align = c("l", "l", "r", "r", "r"), escape = FALSE)
 ```
 
-After adjustment, the &le;3 day estimate for shot difference was negative but imprecise: `r fmt(short_effect$estimate)` shots relative to &ge;8 days (95% CI `r fmt(short_effect$conf_low)` to `r fmt(short_effect$conf_high)`). The win model gave a similar interpretation: the odds ratio for winning after &le;3 days of rest was `r fmt(win_short$odds_ratio)` (95% CI `r fmt(win_short$conf_low)` to `r fmt(win_short$conf_high)`). The &le;3 day estimates for foul difference and card difference were also small and statistically uncertain: `r fmt(foul_short$estimate)` fouls (95% CI `r fmt(foul_short$conf_low)` to `r fmt(foul_short$conf_high)`) and `r fmt(card_short$estimate)` cards (95% CI `r fmt(card_short$conf_low)` to `r fmt(card_short$conf_high)`). Shots-on-target difference and goal difference also did not show a clear large short-rest penalty.
+After adjustment, the `r le()`3 day estimate for shot difference was negative but imprecise: `r fmt(short_effect$estimate)` shots relative to `r ge()`8 days (95% CI `r fmt(short_effect$conf_low)` to `r fmt(short_effect$conf_high)`). The win model gave a similar interpretation: the odds ratio for winning after `r le()`3 days of rest was `r fmt(win_short$odds_ratio)` (95% CI `r fmt(win_short$conf_low)` to `r fmt(win_short$conf_high)`). The `r le()`3 day estimates for foul difference and card difference were also small and statistically uncertain: `r fmt(foul_short$estimate)` fouls (95% CI `r fmt(foul_short$conf_low)` to `r fmt(foul_short$conf_high)`) and `r fmt(card_short$estimate)` cards (95% CI `r fmt(card_short$conf_low)` to `r fmt(card_short$conf_high)`). Shots-on-target difference and goal difference also did not show a clear large short-rest penalty.
 
 ## COVID Sensitivity Analysis
 
@@ -388,7 +411,7 @@ covid_sample_tbl |>
   kable(caption = "COVID sensitivity sample", align = c("l", "r", "r", "r", "r", "r"))
 ```
 
-[Table 8](#table-8) repeats the &le;3 day adjusted continuous-outcome estimates after excluding the COVID-affected restart period.
+[Table 8](#table-8) repeats the `r le()`3 day adjusted continuous-outcome estimates after excluding the COVID-affected restart period.
 
 <a id="table-8"></a>
 
@@ -402,7 +425,7 @@ covid_effects_tbl |>
     Estimate = fmt(estimate),
     `95% CI` = paste0(fmt(conf_low), " to ", fmt(conf_high))
   ) |>
-  kable(caption = "COVID sensitivity: adjusted &le;3 day effects", align = c("l", "l", "l", "r", "r"), escape = FALSE)
+  kable(caption = paste0("COVID sensitivity: adjusted ", le(), "3 day effects"), align = c("l", "l", "l", "r", "r"), escape = FALSE)
 ```
 
 [Table 9](#table-9) reports the COVID sensitivity estimate for adjusted odds of winning.
@@ -423,7 +446,7 @@ covid_win_tbl |>
   kable(caption = "COVID sensitivity: adjusted odds of winning", align = c("l", "l", "l", "r", "r", "r"), escape = FALSE)
 ```
 
-Excluding the COVID-affected end of 2019/20 did not materially change the conclusion. The &le;3 day shot-difference estimate became `r fmt(covid_short$estimate)` shots (95% CI `r fmt(covid_short$conf_low)` to `r fmt(covid_short$conf_high)`), and the win odds ratio was `r fmt(covid_win_short$odds_ratio)` (95% CI `r fmt(covid_win_short$conf_low)` to `r fmt(covid_win_short$conf_high)`). This suggests that the main finding is not driven by the abnormal 2019/20 restart period.
+Excluding the COVID-affected end of 2019/20 did not materially change the conclusion. The `r le()`3 day shot-difference estimate became `r fmt(covid_short$estimate)` shots (95% CI `r fmt(covid_short$conf_low)` to `r fmt(covid_short$conf_high)`), and the win odds ratio was `r fmt(covid_win_short$odds_ratio)` (95% CI `r fmt(covid_win_short$conf_low)` to `r fmt(covid_win_short$conf_high)`). This suggests that the main finding is not driven by the abnormal 2019/20 restart period.
 
 # Discussion
 
