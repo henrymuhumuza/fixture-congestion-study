@@ -9,6 +9,10 @@ format:
     number-sections: true
     theme: cosmo
     css: styles.css
+  docx:
+    toc: false
+    number-sections: false
+    reference-doc: reference.docx
 execute:
   echo: false
   warning: false
@@ -60,6 +64,17 @@ metric_table <- function(x) {
   )
 }
 ```
+
+::: {.content-visible when-format="docx"}
+Author: Henry Muhumuza  
+Affiliation: Makerere University, Kampala, Uganda  
+Address: Kampala, Uganda  
+Email: contact@henrymuhumuza.com
+
+Corresponding author: Henry Muhumuza, Makerere University, Kampala, Uganda; Email: contact@henrymuhumuza.com
+
+\newpage
+:::
 
 # Abstract
 

@@ -9,3 +9,6 @@ outputs/
 
 /.quarto/
 **/*.quarto_ipynb
+manuscript/reference.docx
+*.docx
+.docx_check/
