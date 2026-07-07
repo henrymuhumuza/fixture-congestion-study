@@ -1,0 +1,19 @@
+table {
+  width: 100%;
+  table-layout: fixed;
+  font-size: 0.82rem;
+}
+
+th, td {
+  white-space: normal;
+  word-break: break-word;
+  vertical-align: top;
+}
+
+.cell-output-display {
+  overflow-x: visible;
+}
+
+figcaption, .figure-caption {
+  font-size: 0.9rem;
+}
