@@ -11,7 +11,21 @@ th, td {
 }
 
 .cell-output-display {
-  overflow-x: visible;
+  overflow-x: auto;
+}
+
+.math.display,
+span.math.display,
+div.math {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.math.display mjx-container,
+span.math.display mjx-container,
+div.math mjx-container {
+  max-width: 100%;
 }
 
 figcaption, .figure-caption {
