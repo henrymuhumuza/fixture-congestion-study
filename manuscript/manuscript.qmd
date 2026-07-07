@@ -145,27 +145,20 @@ Rolling team and opponent form were calculated as mean points over the previous 
 
 The primary model was a linear mixed-effects model in which shot difference was regressed on rest category, venue, prior team form, prior opponent form, market-implied strength difference, league, season, season progress, recent all-match load, recent European match load, recent domestic cup match load, recent away-match load, and whether the team's immediately previous match was in European competition. The model also included random intercepts for the team and the opponent.
 
-In text-equation form, the primary model was:
+Model formula in words: shot difference equals beta0 plus rest category plus venue plus prior team form plus prior opponent form plus market-implied strength difference plus league plus season plus season progress plus recent all-match load plus recent European match load plus recent domestic cup match load plus recent away-match load plus previous European match indicator plus team random intercept plus opponent random intercept plus error.
 
-```text
-Shot difference =
-  rest category
-  + venue
-  + prior team form
-  + prior opponent form
-  + market-implied strength difference
-  + league
-  + season
-  + season progress
-  + recent all-match load
-  + recent European match load
-  + recent domestic cup match load
-  + recent away-match load
-  + previous match was European
-  + team random intercept
-  + opponent random intercept
-  + residual error
-```
+In equation form, the primary model was:
+
+$$
+\begin{aligned}
+ShotDifference_{ijm} =\ &\beta_0 + \beta_1 RestCategory_{ijm} + \beta_2 Venue_{ijm} \\
+&+ \beta_3 PriorTeamForm_{ijm} + \beta_4 PriorOpponentForm_{ijm} + \beta_5 MarketStrengthDifference_{ijm} \\
+&+ \beta_6 League_{ijm} + \beta_7 Season_{ijm} + \beta_8 SeasonProgress_{ijm} \\
+&+ \beta_9 RecentAllMatchLoad_{ijm} + \beta_{10} RecentEuropeanMatchLoad_{ijm} \\
+&+ \beta_{11} RecentDomesticCupMatchLoad_{ijm} + \beta_{12} RecentAwayMatchLoad_{ijm} \\
+&+ \beta_{13} PreviousMatchWasEuropean_{ijm} + u_i + v_j + \varepsilon_{ijm}
+\end{aligned}
+$$
 
 In this model, shot difference means team shots minus opponent shots. Rest category compares shorter rest intervals with the reference category of &ge;8 days. Venue indicates whether the team was playing at home or away. Prior team form and prior opponent form are each the average points earned over the previous ten league matches. Market-implied strength difference is the team's bookmaker-implied win probability minus the opponent's bookmaker-implied win probability, after normalizing for bookmaker margin. Season progress measures how far through the team's league season the match occurred. Recent all-match load, European match load, domestic cup match load, and away-match load count matches in the preceding seven days. The previous-European-match indicator identifies whether the immediately preceding included fixture was a European match.
 
